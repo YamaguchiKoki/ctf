@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>KiloFile</title>
+    <style>
+      :root {
+        --ink: #1e1b16;
+        --muted: #6b6258;
+        --bg: #f7f1e7;
+        --panel: #fff7ea;
+        --accent: #d07a2c;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", serif;
+        color: var(--ink);
+        background: radial-gradient(circle at 80% 0%, #ffe9c6 0%, var(--bg) 60%)
+          fixed;
+      }
+      header {
+        padding: 28px 24px 8px;
+        max-width: 900px;
+        margin: 0 auto;
+      }
+      h1 {
+        margin: 0 0 6px;
+        font-size: 34px;
+      }
+      .tagline { color: var(--muted); margin: 0; }
+      main {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 12px 24px 48px;
+      }
+      .panel {
+        background: var(--panel);
+        border: 1px solid #f0d6b7;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 16px 40px rgba(30, 27, 22, 0.08);
+      }
+      .frame {
+        margin-top: 16px;
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #f2dcc2;
+        padding: 16px;
+        text-align: center;
+      }
+      img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+      }
+      .meta {
+        margin-top: 12px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .error {
+        margin-top: 12px;
+        color: #b1302a;
+        font-weight: 600;
+      }
+      a {
+        color: var(--accent);
+        text-decoration: none;
+        border-bottom: 1px solid #e1b78a;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>KiloFile</h1>
+      <p class="tagline">Uploaded image viewer</p>
+    </header>
+    <main>
+      <section class="panel">
+        <div class="frame">
+          <img id="preview" alt="uploaded image" />
+          <div id="filename" class="meta"></div>
+        </div>
+        <div id="error" class="error" hidden></div>
+        <div class="meta" style="margin-top:16px;">
+          <a href="/">Back to upload</a>
+        </div>
+      </section>
+    </main>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const fileId = params.get("file_id");
+      const previewEl = document.getElementById("preview");
+      const filenameEl = document.getElementById("filename");
+      const errorEl = document.getElementById("error");
+
+      if (!fileId) {
+        errorEl.textContent = "Missing file_id.";
+        errorEl.hidden = false;
+      } else {
+        previewEl.src = `/api/file/${fileId}`;
+        fetch(`/api/filename/${fileId}`)
+          .then((res) => (res.ok ? res.text() : null))
+          .then((data) => {
+            filenameEl.innerHTML = `<i>Filename: ${data}</i>`;
+          });
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Report</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="container">
+    <h1>Report</h1>
+    <p class="message">Report us anything!</p>
+    <form action="/report" method="POST">
+      <input name="url" placeholder="{{APP_URL}}render/en">
+      <input type="submit" value="Submit">
+    </form>
+    <p><a href="{{ url_for('index') }}">Back</a></p>
+  </main>
+</body>
+</html>

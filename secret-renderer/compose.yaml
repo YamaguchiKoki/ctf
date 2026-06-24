@@ -1,0 +1,16 @@
+services:
+  nginx:
+    build:
+      context: ./nginx
+    restart: unless-stopped
+    init: true
+    ports:
+      - ${PORT_WEB:-3000}:3000
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    init: true
+    environment:
+      - APP_URL=http://nginx:3000/
+      - FLAG=Alpaca{REDACTED}

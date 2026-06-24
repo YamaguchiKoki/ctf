@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rendered Secret</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="container">
+    <h1>Rendered Secret</h1>
+    <p class="message">{{ message }}</p>
+    <p><a href="{{ url_for('index') }}">Back</a></p>
+    <p><a href="{{ url_for('report_get') }}">Report</a></p>
+  </main>
+</body>
+</html>

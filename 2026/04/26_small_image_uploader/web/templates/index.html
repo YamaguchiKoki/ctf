@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>KiloFile</title>
+    <style>
+      :root {
+        --ink: #1e1b16;
+        --muted: #6b6258;
+        --bg: #f7f1e7;
+        --panel: #fff7ea;
+        --accent: #d07a2c;
+        --accent-ink: #3f1f00;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", serif;
+        color: var(--ink);
+        background: radial-gradient(circle at 20% 20%, #fff0d8 0%, var(--bg) 55%)
+          fixed;
+      }
+      header {
+        padding: 32px 24px 8px;
+        max-width: 820px;
+        margin: 0 auto;
+      }
+      h1 {
+        margin: 0 0 6px;
+        font-size: 40px;
+        letter-spacing: 0.5px;
+      }
+      .tagline {
+        color: var(--muted);
+        margin: 0;
+        font-size: 16px;
+      }
+      main {
+        max-width: 820px;
+        margin: 0 auto;
+        padding: 20px 24px 48px;
+      }
+      .panel {
+        background: var(--panel);
+        border: 1px solid #f0d6b7;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 16px 40px rgba(30, 27, 22, 0.08);
+      }
+      .drop {
+        border: 2px dashed #e1b78a;
+        border-radius: 12px;
+        padding: 28px;
+        text-align: center;
+        background: #fffaf1;
+      }
+      .drop input[type="file"] {
+        display: block;
+        margin: 16px auto 0;
+        font-size: 14px;
+      }
+      .actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 18px;
+        flex-wrap: wrap;
+      }
+      button {
+        appearance: none;
+        border: none;
+        padding: 10px 18px;
+        font-weight: 600;
+        border-radius: 10px;
+        background: var(--accent);
+        color: #fff;
+        cursor: pointer;
+        font-size: 15px;
+      }
+      button:disabled {
+        background: #d6c2ae;
+        cursor: not-allowed;
+      }
+      .note {
+        margin-top: 12px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .result {
+        margin-top: 20px;
+        padding: 16px;
+        border-radius: 12px;
+        background: #fff;
+        border: 1px solid #f2dcc2;
+        display: none;
+      }
+      .samples {
+        margin-top: 22px;
+        display: grid;
+        gap: 12px;
+      }
+      .samples h2 {
+        margin: 0;
+        font-size: 18px;
+      }
+      .sample-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .sample-list a {
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: #fff3e1;
+        border: 1px solid #f2dcc2;
+        color: var(--accent-ink);
+        text-decoration: none;
+        font-size: 14px;
+      }
+      .result a {
+        color: var(--accent-ink);
+        text-decoration: none;
+        border-bottom: 1px solid #dcb48b;
+      }
+      .error {
+        margin-top: 12px;
+        color: #b1302a;
+        font-weight: 600;
+        display: none;
+      }
+      @media (max-width: 640px) {
+        h1 { font-size: 32px; }
+        .panel { padding: 18px; }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>KiloFile</h1>
+      <p class="tagline">Share tiny images fast (up to 1KB).</p>
+    </header>
+    <main>
+      <section class="panel">
+        <div class="drop">
+          <strong>Select an image</strong>
+          <input id="fileInput" type="file" accept="image/png,image/jpeg,image/gif" />
+        </div>
+        <div class="actions">
+          <button id="uploadBtn" type="button">Upload</button>
+        </div>
+        <div class="note">Supported: PNG / JPG / GIF (max 1KB)</div>
+        <div id="error" class="error"></div>
+        <div id="result" class="result"></div>
+        <div class="samples">
+          <h2>Samples</h2>
+          <ul class="sample-list">
+            {% if samples %}
+              {% for sample_id in samples %}
+                <li><a href="/file?file_id={{ sample_id }}">View {{ sample_id }}</a></li>
+              {% endfor %}
+            {% else %}
+              <li>No samples available.</li>
+            {% endif %}
+          </ul>
+        </div>
+      </section>
+    </main>
+    <script>
+      const fileInput = document.getElementById("fileInput");
+      const uploadBtn = document.getElementById("uploadBtn");
+      const errorEl = document.getElementById("error");
+      const resultEl = document.getElementById("result");
+
+      const setError = (msg) => {
+        if (!msg) {
+          errorEl.style.display = "none";
+          errorEl.textContent = "";
+          return;
+        }
+        errorEl.textContent = msg;
+        errorEl.style.display = "block";
+      };
+
+      const setResult = (html) => {
+        if (!html) {
+          resultEl.style.display = "none";
+          resultEl.innerHTML = "";
+          return;
+        }
+        resultEl.innerHTML = html;
+        resultEl.style.display = "block";
+      };
+
+      uploadBtn.addEventListener("click", async () => {
+        setError("");
+        setResult("");
+
+        const file = fileInput.files[0];
+        if (!file) {
+          setError("Please choose a file.");
+          return;
+        }
+
+        uploadBtn.disabled = true;
+        try {
+          const formData = new FormData();
+          formData.append("file", file);
+
+          const res = await fetch("/api/upload", {
+            method: "POST",
+            body: formData,
+          });
+
+          const data = await res.json();
+          if (!res.ok) {
+            setError(data.error || "Upload failed.");
+            return;
+          }
+
+          const fileId = data.file_id;
+          const link = `/file?file_id=${fileId}`;
+          setResult(
+            `Upload complete: <a href="${link}">${link}</a>`
+          );
+        } catch (err) {
+          setError("Network error.");
+        } finally {
+          uploadBtn.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>

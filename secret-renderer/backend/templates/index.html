@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Home</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="container">
+    <h1>Secret Viewer</h1>
+    <p>Select language</p>
+    <nav class="menu">
+      <a href="{{ url_for('render', lang='en') }}">English</a>
+      <a href="{{ url_for('render', lang='ja') }}">Japanese</a>
+      <a href="{{ url_for('render', lang='zh') }}">Chinese</a>
+      <a href="{{ url_for('render', lang='ko') }}">Korean</a>
+      <a href="{{ url_for('render', lang='es') }}">Spanish</a>
+    </nav>
+    <a href="{{ url_for('register_page') }}">Register</a></p>
+  </main>
+</body>
+</html>
